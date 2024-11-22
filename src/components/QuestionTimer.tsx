@@ -8,17 +8,21 @@ type QuestionTimerType = {
 const QuestionTimer = ({ onTimeout, timeout }: QuestionTimerType) => {
 	const [remainingTime, setRemainingTime] = useState<number>(timeout);
 
-	setTimeout(onTimeout, timeout);
-
 	useEffect(() => {
-		setTimeout(onTimeout, timeout);
+		const timer = setTimeout(onTimeout, timeout);
+		return () => {
+			clearTimeout(timer);
+		};
 	}, [timeout, onTimeout]);
 
 	useEffect(() => {
-		setInterval(() => {
+		const interval = setInterval(() => {
 			setRemainingTime((prevRemainingTime) => prevRemainingTime - 100);
 		}, 100);
-	}, [timeout, onTimeout]);
+		return () => {
+			clearInterval(interval);
+		};
+	}, []);
 
 	return <progress id='question-time' max={timeout} value={remainingTime} />;
 };
