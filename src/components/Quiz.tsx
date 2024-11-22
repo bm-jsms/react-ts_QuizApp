@@ -1,24 +1,36 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { QUESTIONS } from '../data';
+import { QuestionTimer } from './QuestionTimer';
 
 import trophy from '../assets/trophy.png';
 
+type UserAnswer = string | null;
+
 const Quiz = () => {
-	const [userAnswers, setUserAnswers] = useState<string[]>([]);
+	const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
+
 	const activeQuestionIndex = userAnswers.length;
 	const quizIsComplete = activeQuestionIndex === QUESTIONS.length;
 
-	const handleSelectAnswer = (selectedAnswer: string) => {
-		setUserAnswers((preUserAnswers) => {
-			return [...preUserAnswers, selectedAnswer];
+	const handleSelectAnswer = useCallback(function handleSelectAnswer(
+		selectedAnswer: string | null,
+	) {
+		setUserAnswers((prevUserAnswers) => {
+			return [...prevUserAnswers, selectedAnswer];
 		});
-	};
+	},
+	[]);
+
+	const handleSkipAnswer = useCallback(
+		() => handleSelectAnswer(null),
+		[handleSelectAnswer],
+	);
 
 	if (quizIsComplete) {
 		return (
 			<div id='summary'>
-				<img src={trophy} alt='trophy icon' />
-				<h2>Quiz completed</h2>
+				<img src={trophy} alt='Trophy icon' />
+				<h2>Quiz Completed!</h2>
 			</div>
 		);
 	}
@@ -29,6 +41,7 @@ const Quiz = () => {
 	return (
 		<div id='quiz'>
 			<div id='question'>
+				<QuestionTimer timeout={10000} onTimeout={handleSkipAnswer} />
 				<h2>{QUESTIONS[activeQuestionIndex].text}</h2>
 				<ul id='answers'>
 					{shuffledAnswers.map((answer) => (
